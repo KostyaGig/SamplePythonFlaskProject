@@ -16,7 +16,6 @@ register_print = Blueprint('register', __name__)
 def register():
     try:
         data = request.get_json()
-        print(f"data is {data}")
 
         email = data["email"]
         name = data["name"]
