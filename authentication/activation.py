@@ -22,9 +22,9 @@ def activate():
     if user_from_db_by_email:
         (email, name, hash_psw, is_active, role) = user_from_db_by_email
         if is_active:
-            return "You already activated the email"
+            return "You have already activated the email"
         else:
-            update_user(email, name, hash_psw.decode('UTF-8'), True, role)
+            update_user(email, name, hash_psw, True, role)
             return f"Activation for {email} succeeded!"
     else:
         return f"User by {email} was not found"
