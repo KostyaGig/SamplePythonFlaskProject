@@ -5,7 +5,7 @@ ADMIN_EMAIL = "admin@gmail.com"
 ADMIN_NAME = "admin"
 ADMIN_ROLE = "admin"
 
-ADMIN_PASSWORD_HASH = hash_of("admin")
+ADMIN_PASSWORD_HASH = str(hash_of("admin"))
 
 
 def is_admin(email, name, password):
