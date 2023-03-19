@@ -27,9 +27,11 @@ def generate_access_and_refresh_tokens(email):
 def token_is_valid(token):
     try:
         jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        return True
+        return True, ""
     except jwt.ExpiredSignatureError:
-        return False
+        return False, "The token has expired"
+    except jwt.exceptions.DecodeError:
+        return False, "The token signature is not corrected"
 
 
 def generate_access_token_expiration_time():
