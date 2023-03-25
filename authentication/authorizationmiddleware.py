@@ -39,6 +39,9 @@ class AuthorizationMiddleWare:
 
 
 """
+    Decorator for adding path to require_auth_paths set.
+    You need it if there is need to check an user's authentication before getting into a route
+    
     Pass path in format /{your_path}
 """
 
