@@ -36,4 +36,4 @@ if __name__ == '__main__':
     init_products_db_if_needed()
     init_product_images_db_if_needed()
     init_product_modifications_db_if_needed()
-    app.run(debug=is_debug)
+    app.run(debug=True)
