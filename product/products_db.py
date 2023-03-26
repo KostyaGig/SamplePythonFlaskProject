@@ -61,7 +61,7 @@ def update_product_in_db(product_id, owner, title, description, status, images):
 
 def delete_product_from_db(product_id, owner):
     (owner_email, _, _, _, _, _) = get_product_by_id(product_id)
-    if owner != owner_email: raise Exception("You cannot update another user's product")
+    if owner != owner_email: raise Exception("You cannot delete another user's product")
 
     delete_images_by_product_id(product_id)
     delete_history_modification(product_id)
