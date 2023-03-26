@@ -34,6 +34,16 @@ def token_is_valid(token):
         return False, "The token signature is not corrected"
 
 
+def get_email_by_token(headers):
+    token = get_token_from_header(headers)
+    payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+    return payload['email']
+
+
+def get_token_from_header(headers):
+    return headers.get("Authorization", " ").split(" ")[1]
+
+
 def generate_access_token_expiration_time():
     scheduled = datetime.datetime.now() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRATION_TIME_IN_MINUTES)
     return int(scheduled.timestamp())
