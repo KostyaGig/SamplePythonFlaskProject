@@ -14,9 +14,9 @@ class AuthorizationMiddleWare:
         if request.path not in require_auth_paths:
             return self.app(environ, start_response)
 
-        splited_token = request.headers.get("Authorization", " ").split(" ")
+        split_token = request.headers.get("Authorization", " ").split(" ")
 
-        if len(splited_token) < 2:
+        if len(split_token) < 2:
             res = Response(
                 "AccessToken is not found(try to Add \"Bearer\" before token)",
                 mimetype="text/plain",
@@ -24,7 +24,7 @@ class AuthorizationMiddleWare:
             )
             return res(environ, start_response)
 
-        token = splited_token[1]
+        token = split_token[1]
 
         (valid, message) = token_is_valid(token)
         if not valid:
