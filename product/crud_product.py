@@ -12,6 +12,9 @@ from product.validation import valid_post_product, valid_update_product, valid_p
     valid_modification_id_with_product_id, valid_similarity_modification_product_id_with_product_id
 from product.images.image_service.service import upload_image
 
+from mail_service.root import send_message_to_admin_about_publishing_new_product, \
+    send_message_to_user_about_approving_or_declining_the_product
+
 post_product_print = Blueprint('post', __name__)
 
 
@@ -39,7 +42,8 @@ def post_product():
                 image_paths.append(path)
 
         if valid_post_product(description, title):
-            insert_product_in_db(owner, title, description, ProductStatus.ON_REVIEW, image_paths)
+            product_id = insert_product_in_db(owner, title, description, ProductStatus.ON_REVIEW, image_paths)
+            send_message_to_admin_about_publishing_new_product(owner, product_id)
             return "OK"
         else:
             return "Description or title is empty"
@@ -141,6 +145,9 @@ def approve_product():
         if valid_product_id_product(product_id):
             (owner, title, desc, created_at, edited_at, _) = get_product_by_id(product_id)
             update_product_in_db(product_id, owner, title, desc, ProductStatus.APPROVED, [])
+
+            product_for_email = (title, desc)
+            send_message_to_user_about_approving_or_declining_the_product(owner, product_for_email, is_approved=True)
             return "OK"
         else:
             return "Product id is not corrected"
@@ -159,6 +166,9 @@ def decline_product():
         if valid_product_id_product(product_id):
             (owner, title, desc, created_at, edited_at, _) = get_product_by_id(product_id)
             update_product_in_db(product_id, owner, title, desc, ProductStatus.DENIED, [])
+
+            product_for_email = (title, desc)
+            send_message_to_user_about_approving_or_declining_the_product(owner, product_for_email, is_approved=False)
             return "OK"
         else:
             return "Product id is not corrected"

@@ -29,15 +29,16 @@ def insert_product_in_db(owner_email, title, description, status, images):
 
     product = (owner_email, title, description, created_at, edited_at, status.value)
 
-    products_cursor.execute(
+    id = products_cursor.execute(
         f"INSERT INTO "
         f"{PRODUCTS_TABLE}(owner_email, title, description, created_at, edited_at, status) "
         f"VALUES(?,?,?,?,?,?);",
-        product)
+        product).lastrowid
 
     if images: insert_images_by_product_id(products_cursor.lastrowid, images)
 
     products_connection.commit()
+    return id
 
 
 def update_product_in_db(product_id, owner, title, description, status, images):
