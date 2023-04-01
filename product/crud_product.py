@@ -6,8 +6,10 @@ from authentication.authorizationmiddleware import require_auth, require_auth_as
 from authentication.token import get_email_by_token
 from authentication.users_db import get_user_by_email
 from product.product_status import ProductStatus
-from product.products_db import insert_product_in_db, update_product_in_db, delete_product_from_db, get_product_by_id
-from product.validation import valid_post_product, valid_update_product, valid_product_id_product
+from product.products_db import insert_product_in_db, update_product_in_db, delete_product_from_db, get_product_by_id, \
+    get_product_by_modification_id
+from product.validation import valid_post_product, valid_update_product, valid_product_id_product, \
+    valid_modification_id_with_product_id, valid_similarity_modification_product_id_with_product_id
 from product.images.image_service.service import upload_image
 
 post_product_print = Blueprint('post', __name__)
@@ -48,6 +50,10 @@ def post_product():
 
 update_product_print = Blueprint('update', __name__)
 
+"""
+    After any updates of the product the status is about to be ProductStatus.ON_REVIEW
+"""
+
 
 @require_auth("/update")
 @update_product_print.route("/update", methods=['POST'])
@@ -69,9 +75,6 @@ def update_product():
                 image_paths.append(path)
 
         if valid_update_product(description, title, product_id):
-            product = get_product_by_id(product_id)
-            if product is None: return f"product by {product_id} does not exist"
-
             update_product_in_db(product_id, owner, title, description, ProductStatus.ON_REVIEW, image_paths)
             return "OK"
         else:
@@ -93,9 +96,6 @@ def delete_product():
         product_id = data.get("product_id", -1)
 
         if valid_product_id_product(product_id):
-            product = get_product_by_id(product_id)
-            if product is None: return f"product by {product_id} does not exist"
-
             delete_product_from_db(product_id, owner)
             return "OK"
         else:
@@ -104,22 +104,42 @@ def delete_product():
         return f"Error occurred {e}"
 
 
-change_product_status_print = Blueprint('change_product_status', __name__)
+modify_product_print = Blueprint('modify_product', __name__)
 
 
-@require_auth("/change_product_status/approve")
-@require_auth_as_admin("/change_product_status/approve")
-@change_product_status_print.route("/change_product_status/approve", methods=['POST'])
+@require_auth("/modify_product/return_to_old_state")
+@modify_product_print.route("/modify_product/return_to_old_state", methods=['POST'])
+def return_to_old_state():
+    try:
+        data = json.loads(request.form.get("json", {}))
+        product_modification_id = data.get("product_modification_id", -1)
+        product_id = data.get("product_id", -1)
+        owner = get_email_by_token(request.headers)
+
+        if valid_modification_id_with_product_id(product_modification_id, product_id):
+            (modification_product_id, title, desc, edited_at) = get_product_by_modification_id(product_modification_id)
+
+            if valid_similarity_modification_product_id_with_product_id(modification_product_id, product_id):
+                update_product_in_db(product_id, owner, title, desc, ProductStatus.ON_REVIEW, [])
+                return "OK"
+            else:
+                return "Modification product id should be equaled to product id"
+        else:
+            return "Product id or modification id is not corrected"
+    except Exception as e:
+        return f"Error occurred {e}"
+
+
+@require_auth("/modify_product/change_product_status/approve")
+@require_auth_as_admin("/modify_product/change_product_status/approve")
+@modify_product_print.route("/modify_product/change_product_status/approve", methods=['POST'])
 def approve_product():
     try:
         data = json.loads(request.form.get("json", {}))
         product_id = data.get("product_id", -1)
 
         if valid_product_id_product(product_id):
-            product = get_product_by_id(product_id)
-            if product is None: return f"product by {product_id} does not exist"
-
-            (owner, title, desc, created_at, edited_at, _) = product
+            (owner, title, desc, created_at, edited_at, _) = get_product_by_id(product_id)
             update_product_in_db(product_id, owner, title, desc, ProductStatus.APPROVED, [])
             return "OK"
         else:
@@ -128,19 +148,16 @@ def approve_product():
         return f"Error occurred {e}"
 
 
-@require_auth("/change_product_status/decline")
-@require_auth_as_admin("/change_product_status/decline")
-@change_product_status_print.route("/change_product_status/decline", methods=['POST'])
+@require_auth("/modify_product/change_product_status/decline")
+@require_auth_as_admin("/modify_product/change_product_status/decline")
+@modify_product_print.route("/modify_product/change_product_status/decline", methods=['POST'])
 def decline_product():
     try:
         data = json.loads(request.form.get("json", {}))
         product_id = data.get("product_id", -1)
 
         if valid_product_id_product(product_id):
-            product = get_product_by_id(product_id)
-            if product is None: return f"product by {product_id} does not exist"
-
-            (owner, title, desc, created_at, edited_at, _) = product
+            (owner, title, desc, created_at, edited_at, _) = get_product_by_id(product_id)
             update_product_in_db(product_id, owner, title, desc, ProductStatus.DENIED, [])
             return "OK"
         else:

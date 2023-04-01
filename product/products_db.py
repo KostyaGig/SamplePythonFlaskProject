@@ -3,7 +3,8 @@ from datetime import datetime
 from product.images.product_images_db import insert_images_by_product_id
 from product.images.product_images_db import update_images_by_product_id
 from product.images.product_images_db import delete_images_by_product_id
-from product.history_modification.product_modifications_db import insert_history_modification, delete_history_modification
+from product.history_modification.product_modifications_db import insert_history_modification, \
+    delete_history_modification, get_product_by_history_modification_id
 
 PRODUCTS_TABLE = "products"
 
@@ -71,7 +72,13 @@ def delete_product_from_db(product_id, owner):
 
 
 def get_product_by_id(product_id):
-    return products_cursor.execute(
+    product = products_cursor.execute(
         f"SELECT owner_email, title, description, created_at, edited_at, status "
         f"FROM {PRODUCTS_TABLE} WHERE id={product_id};"
     ).fetchone()
+
+    if product is None: raise Exception(f"product by {product_id} id does not exist")
+    return product
+
+def get_product_by_modification_id(product_modification_id):
+    return get_product_by_history_modification_id(product_modification_id)

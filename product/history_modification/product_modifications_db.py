@@ -32,3 +32,13 @@ def insert_history_modification(product_id, title, description):
 def delete_history_modification(product_id):
     product_modifications_cursor.execute(f"DELETE FROM {PRODUCT_MODIFICATIONS_TABLE} WHERE product_id={product_id}")
     product_modifications_connection.commit()
+
+
+def get_product_by_history_modification_id(modification_id):
+    product = product_modifications_cursor.execute(
+        f"SELECT product_id, title, description, edited_at "
+        f"FROM {PRODUCT_MODIFICATIONS_TABLE} WHERE id={modification_id};"
+    ).fetchone()
+
+    if product is None: raise Exception(f"product by {modification_id} modification id does not exist")
+    return product
