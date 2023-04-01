@@ -69,6 +69,9 @@ def update_product():
                 image_paths.append(path)
 
         if valid_update_product(description, title, product_id):
+            product = get_product_by_id(product_id)
+            if product is None: return f"product by {product_id} does not exist"
+
             update_product_in_db(product_id, owner, title, description, ProductStatus.ON_REVIEW, image_paths)
             return "OK"
         else:
@@ -90,6 +93,9 @@ def delete_product():
         product_id = data.get("product_id", -1)
 
         if valid_product_id_product(product_id):
+            product = get_product_by_id(product_id)
+            if product is None: return f"product by {product_id} does not exist"
+
             delete_product_from_db(product_id, owner)
             return "OK"
         else:
@@ -110,7 +116,10 @@ def approve_product():
         product_id = data.get("product_id", -1)
 
         if valid_product_id_product(product_id):
-            (owner, title, desc, created_at, edited_at, _) = get_product_by_id(product_id)
+            product = get_product_by_id(product_id)
+            if product is None: return f"product by {product_id} does not exist"
+
+            (owner, title, desc, created_at, edited_at, _) = product
             update_product_in_db(product_id, owner, title, desc, ProductStatus.APPROVED, [])
             return "OK"
         else:
@@ -128,11 +137,13 @@ def decline_product():
         product_id = data.get("product_id", -1)
 
         if valid_product_id_product(product_id):
-            (owner, title, desc, created_at, edited_at, _) = get_product_by_id(product_id)
+            product = get_product_by_id(product_id)
+            if product is None: return f"product by {product_id} does not exist"
+
+            (owner, title, desc, created_at, edited_at, _) = product
             update_product_in_db(product_id, owner, title, desc, ProductStatus.DENIED, [])
             return "OK"
         else:
             return "Product id is not corrected"
     except Exception as e:
         return f"Error occurred {e}"
-
