@@ -1,8 +1,9 @@
 from werkzeug.wrappers import Request, Response
-from authentication.token import token_is_valid
+from authentication.token import token_is_valid, get_email_by_token
+from authentication.admin import is_admin_email
 
 require_auth_paths = set()
-
+admin_paths = set()
 
 class AuthorizationMiddleWare:
     def __init__(self, app):
@@ -35,6 +36,17 @@ class AuthorizationMiddleWare:
             )
             return res(environ, start_response)
 
+        if request.path in admin_paths:
+            email = get_email_by_token(request.headers)
+            if not(is_admin_email(email)):
+                res = Response(
+                    "You do not have enough rights to get to the endpoint",
+                    mimetype="text/plain",
+                    status=401
+                )
+                return res(environ, start_response)
+
+
         return self.app(environ, start_response)
 
 
@@ -48,6 +60,17 @@ class AuthorizationMiddleWare:
 
 def require_auth(path):
     require_auth_paths.add(path)
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+def require_auth_as_admin(path):
+    admin_paths.add(path)
 
     def decorator(func):
         def wrapper(*args, **kwargs):
