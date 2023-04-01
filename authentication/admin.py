@@ -10,3 +10,7 @@ ADMIN_PASSWORD_HASH = str(hash_of("admin"))
 
 def is_admin(email, name, password):
     return email == ADMIN_EMAIL and name == ADMIN_NAME and check_psw(password, ADMIN_PASSWORD_HASH)
+
+
+def is_admin_email(email):
+    return email == ADMIN_EMAIL

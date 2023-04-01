@@ -15,5 +15,5 @@ def check_status(status):
            or status == ProductStatus.DENIED.value
 
 
-def valid_delete_product(product_id):
+def valid_product_id_product(product_id):
     return product_id >= 0
