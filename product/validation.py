@@ -17,3 +17,11 @@ def check_status(status):
 
 def valid_product_id_product(product_id):
     return product_id >= 0
+
+
+def valid_modification_id_with_product_id(modification_product_id, product_id):
+    return product_id >= 0 and modification_product_id >= 0
+
+
+def valid_similarity_modification_product_id_with_product_id(modification_product_id, product_id):
+    return modification_product_id == product_id
