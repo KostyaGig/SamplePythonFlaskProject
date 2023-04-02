@@ -3,8 +3,14 @@ from collections import defaultdict
 from product.event.product_events import ProductEvent
 from product.event.product_subscriber import ProductSubscriber
 
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
-class ProductPublisher:
+class ProductPublisher(metaclass=Singleton):
 
     def __init__(self):
         self.events_to_subscriber_dict = defaultdict()
