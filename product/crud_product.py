@@ -1,10 +1,14 @@
+import json
+
 from flask import Blueprint
 from flask import request
-import json
 
 from authentication.authorizationmiddleware import require_auth, require_auth_as_admin
 from authentication.token import get_email_by_token
 from authentication.users_db import get_user_by_email
+from notification_service.root import notify_user_about_approving_or_declining_the_product
+from product.event.product_events import PostProductEvent
+from product.event.product_publisher import ProductPublisher
 from product.product_status import ProductStatus
 from product.products_db import insert_product_in_db, update_product_in_db, delete_product_from_db, get_product_by_id, \
     get_product_by_modification_id
@@ -12,8 +16,7 @@ from product.validation import valid_post_product, valid_update_product, valid_p
     valid_modification_id_with_product_id, valid_similarity_modification_product_id_with_product_id
 from product.images.image_service.service import upload_image
 
-from notification_service.root import notify_admin_about_publishing_new_product, \
-    notify_user_about_approving_or_declining_the_product
+product_event_publisher = ProductPublisher()
 
 post_product_print = Blueprint('post', __name__)
 
@@ -27,7 +30,7 @@ def post_product():
         owner = get_email_by_token(request.headers)
         user = get_user_by_email(owner)
 
-        (_, _, _, is_active, _) = user
+        (owner_id, _, _, _, is_active, _) = user
         if is_active == 0: return "Please, active your account to post the product"
 
         description = data.get('description', '')
@@ -43,7 +46,13 @@ def post_product():
 
         if valid_post_product(description, title):
             product_id = insert_product_in_db(owner, title, description, ProductStatus.ON_REVIEW, image_paths)
-            notify_admin_about_publishing_new_product(owner, product_id)
+            product_event_publisher.send(
+                event=PostProductEvent(
+                    owner_email=owner,
+                    owner_id=owner_id,
+                    product_id=product_id
+                )
+            )
             return "OK"
         else:
             return "Description or title is empty"
@@ -55,7 +64,7 @@ def post_product():
 update_product_print = Blueprint('update', __name__)
 
 """
-    After any updates of the product the status is about to be ProductStatus.ON_REVIEW
+    After any updates of the product_notifier the status is about to be ProductStatus.ON_REVIEW
 """
 
 

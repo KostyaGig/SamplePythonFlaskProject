@@ -3,6 +3,10 @@ from authentication.authentication import register_print, login_print
 from authentication.users_db import init_users_db_if_needed
 from authentication.activation import activation_print
 from authentication.authorizationmiddleware import AuthorizationMiddleWare
+from notification_service.routers import subscribe_to_user_changes, unsubscribe_from_user_changes
+from notification_service.subscriptions.notification_service_subscriptions import \
+    init_notification_subscriptions_db_if_needed
+from product.event.product_publisher import subscribe_to_product_events
 
 from product.products_db import init_products_db_if_needed
 from product.images.product_images_db import init_product_images_db_if_needed
@@ -37,4 +41,5 @@ if __name__ == '__main__':
     init_products_db_if_needed()
     init_product_images_db_if_needed()
     init_product_modifications_db_if_needed()
+    subscribe_to_product_events()
     app.run(debug=True)
