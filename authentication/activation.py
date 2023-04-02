@@ -20,7 +20,7 @@ def activate():
 
     user_from_db_by_email = get_user_by_email(email)
     if user_from_db_by_email:
-        (email, name, hash_psw, is_active, role) = user_from_db_by_email
+        (id, email, name, hash_psw, is_active, role) = user_from_db_by_email
         if is_active:
             return "You have already activated the email"
         else:

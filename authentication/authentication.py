@@ -69,7 +69,7 @@ def login():
     if not user_exists(email):
         return f"User by {email} has not been registered yet"
 
-    (_, _, password_hash, _, role) = get_user_by_email(email)
+    (_, _, _, password_hash, _, role) = get_user_by_email(email)
 
     if check_psw(password, password_hash):
         (access_token, refresh_token) = generate_access_and_refresh_tokens(email)
