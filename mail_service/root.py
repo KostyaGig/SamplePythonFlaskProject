@@ -6,11 +6,13 @@ from email.mime.text import MIMEText
 from authentication.admin import ADMIN_SENDER_MAIL, ADMIN_SENDER_LOGIN_PASSWORD
 
 
-def send_message_to_admin_about_publishing_new_product(publisher_email, product_id):
+def send_message_to_admin_about_publishing_new_product(publisher_email, product_id, title, desc):
     message = build_message_with_subject(ADMIN_SENDER_MAIL, ADMIN_SENDER_MAIL, "New Product")
     link_to_approve = "http://127.0.0.1:5000/modify_product/change_product_status/approve"
     link_to_decline = "http://127.0.0.1:5000/modify_product/change_product_status/decline"
     body = f"Dear Admin, \nA new product by {product_id} id has been sent to the review.\nThe owner is {publisher_email}." \
+           f"\nIts title: {title}" \
+           f"\nIts description: {desc}" \
            f"\nYou can approve it via {link_to_approve} \nor decline via {link_to_decline}"
     message.attach(MIMEText(body, "plain"))
 
@@ -26,6 +28,16 @@ def send_message_to_user_about_approving_or_declining_the_product(owner, product
     body = f"Dear {owner}, \nProduct \"{title}\" has been {result}"
     message.attach(MIMEText(body, "plain"))
     send(owner, message=message)
+
+
+def send_message_to_user_about_posting_new_product(owner, subscriber_email, title, desc):
+    message = build_message_with_subject(ADMIN_SENDER_MAIL, subscriber_email, f"New product form {owner}")
+
+    body = f"Dear {subscriber_email}, {owner} has just published new product! " \
+           f"\n Its title: {title} " \
+           f"\n Its description: {desc}"
+    message.attach(MIMEText(body, "plain"))
+    send(subscriber_email, message=message)
 
 
 def build_message_with_subject(from_email, to_email, subject):

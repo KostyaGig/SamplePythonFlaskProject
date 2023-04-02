@@ -32,6 +32,12 @@ app.register_blueprint(update_product_print)
 app.register_blueprint(delete_product_print)
 app.register_blueprint(modify_product_print)
 
+"""
+    Set up notification
+"""
+app.register_blueprint(subscribe_to_user_changes)
+app.register_blueprint(unsubscribe_from_user_changes)
+
 @app.route("/")
 def root():
     return "Server is running..."
@@ -42,4 +48,5 @@ if __name__ == '__main__':
     init_product_images_db_if_needed()
     init_product_modifications_db_if_needed()
     subscribe_to_product_events()
+    init_notification_subscriptions_db_if_needed()
     app.run(debug=True)

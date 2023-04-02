@@ -53,6 +53,13 @@ def update_user(email, name, hash_psw, is_active, role):
 
 def get_user_by_email(email):
     return users_cursor.execute(
-        f"SELECT email, name, password, is_active, role "
+        f"SELECT id, email, name, password, is_active, role "
         f"FROM {USERS_TABLE} WHERE email='{email}';"
+    ).fetchone()
+
+
+def get_user_by_id(id):
+    return users_cursor.execute(
+        f"SELECT email, name, password, is_active, role "
+        f"FROM {USERS_TABLE} WHERE id={id};"
     ).fetchone()
